@@ -56,4 +56,7 @@ let intOrFloatLiteral =
 // combinators
 let stringLiteral = quote >>. manyCharsTill anyChar quote |>> Expr.StringLiteral
 
-let expr = intOrFloatLiteral <|> stringLiteral
+let identifier = many1Chars (letter <|> digit) |>> Expr.Identifier
+
+// order is important
+let expr = choice [ intOrFloatLiteral; stringLiteral; identifier ]
