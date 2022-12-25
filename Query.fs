@@ -39,6 +39,7 @@ type Stmt =
 type Query = { Statements: Stmt list }
 
 let ws = skipMany (skipChar ' ')
+let ws1 = skipMany1 (skipChar ' ')
 
 let quote: Parser<_, unit> = skipChar '\''
 
@@ -99,3 +100,26 @@ opp.AddOperator
 
 
 let expr = opp.ExpressionParser
+
+let orderDirAsc = skipString "asc" >>% OrderDir.Ascending .>> ws
+let orderDirDesc = skipString "desc" >>% OrderDir.Descending .>> ws
+let orderDir = orderDirAsc <|> orderDirDesc
+
+let filterBy = skipString "filterby" >>. ws1 >>. expr .>> ws |>> Stmt.FilterBy
+
+let orderBy =
+    skipString "orderby" >>. ws1 >>. expr .>>. orderDir .>> ws |>> Stmt.OrderBy
+
+let skip = skipString "skip" >>. ws1 >>. pint32 .>> ws |>> Stmt.Skip
+let take = skipString "take" >>. ws1 >>. pint32 .>> ws |>> Stmt.Take
+
+let stmt = choice [ filterBy; orderBy; skip; take ]
+
+let query = sepEndBy stmt skipNewline |>> fun s -> { Statements = s }
+
+let queryFull = spaces >>. query .>> spaces .>> eof
+
+let parse input =
+    match run queryFull input with
+    | Success(res, _, _) -> Result.Ok res
+    | Failure(err, _, _) -> Result.Error err

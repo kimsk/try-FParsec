@@ -1,20 +1,35 @@
 open FParsec
 open Qry.Query
 
-let result = run expr "'hello world\r\n'"
-printfn "%O" result
 
-let result2 = run expr "3.14"
-printfn "%O" result2
+let parseAndPrint input =
+    let result: ParserResult<Expr, unit> = run expr input
 
-let result3 = run expr "3.0"
-printfn "%O" result3
+    match result with
+    | Success(r, _, _) -> printfn "%s -> %O" input r
+    | Failure(e, _, _) -> printfn "%O" e
 
-let result4 = run expr "3"
-printfn "%O" result4
 
-let result5 = run expr "Category"
-printfn "%O" result5
+parseAndPrint "'hello world\r\n'"
 
-let result6 = run expr "Category = 'Fantasy'"
-printfn "%O" result6
+
+parseAndPrint "3.14"
+parseAndPrint "3.0"
+parseAndPrint "3"
+parseAndPrint "Category"
+parseAndPrint "Category = 'Fantasy'"
+//parseAndPrint "= 'Fantasy'"
+
+
+let input =
+    """
+filterby Category = 'Fantasy'
+orderby Rating asc
+take 1
+"""
+
+let result = parse input
+
+match result with
+| Result.Ok res -> printfn "%O" res
+| Result.Error err -> printfn "%O" err
