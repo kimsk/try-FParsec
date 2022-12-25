@@ -15,3 +15,6 @@ printfn "%O" result4
 
 let result5 = run expr "Category"
 printfn "%O" result5
+
+let result6 = run expr "Category = 'Fantasy'"
+printfn "%O" result6
