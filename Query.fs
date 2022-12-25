@@ -44,5 +44,16 @@ let b = Expr.Binary(FloatLiteral 3.14, IntLiteral 42, GreaterThan)
 
 let quote: Parser<_, unit> = skipChar '\''
 
+let intOrFloatLiteral =
+    numberLiteral (NumberLiteralOptions.DefaultFloat ||| NumberLiteralOptions.DefaultInteger) "number"
+    |>> fun n ->
+            if n.IsInteger then
+                Expr.IntLiteral(int n.String)
+            else
+                Expr.FloatLiteral(float n.String)
+
+
 // combinators
 let stringLiteral = quote >>. manyCharsTill anyChar quote |>> Expr.StringLiteral
+
+let expr = intOrFloatLiteral <|> stringLiteral
