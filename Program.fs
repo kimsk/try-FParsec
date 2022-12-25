@@ -1,6 +1,8 @@
 open FParsec
+open Qry
 open Qry.Query
 
+let books = Books.getAll ()
 
 let parseAndPrint input =
     let result: ParserResult<Expr, unit> = run expr input
@@ -24,12 +26,15 @@ parseAndPrint "Category = 'Fantasy'"
 let input =
     """
 filterby Category = 'Fantasy'
-orderby Rating asc
-take 1
+orderby Rating desc
+skip 0
+take 2
 """
 
 let result = parse input
 
 match result with
-| Result.Ok res -> printfn "%O" res
+| Result.Ok res ->
+    let queryResult = execute res books
+    List.iter (fun i -> printfn "%O" i) queryResult
 | Result.Error err -> printfn "%O" err

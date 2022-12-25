@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <Compile Include="Query.fs" />
+    <Compile Include="Books.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 

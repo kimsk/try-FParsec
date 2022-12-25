@@ -1,6 +1,7 @@
 module Qry.Query
 
 open FParsec
+open System
 
 type BinaryExprKind =
     // mathematical
@@ -123,3 +124,52 @@ let parse input =
     match run queryFull input with
     | Success(res, _, _) -> Result.Ok res
     | Failure(err, _, _) -> Result.Error err
+
+let execute query source =
+    let rec evaluate expr element =
+        match expr with
+        | IntLiteral i -> i :> obj
+        | FloatLiteral f -> f :> obj
+        | StringLiteral s -> s :> obj
+        | Identifier n -> element.GetType().GetProperty(n).GetValue(element)
+        | Binary(left, right, kind) ->
+            let leftEvaluated = evaluate left element
+            let rightEvaluated = evaluate right element
+
+            match kind with
+            | Add -> (leftEvaluated :?> float) + (rightEvaluated :?> float) :> obj
+            | Subtract -> (leftEvaluated :?> float) - (rightEvaluated :?> float) :> obj
+            | Multiply -> (leftEvaluated :?> float) * (rightEvaluated :?> float) :> obj
+            | Divide -> (leftEvaluated :?> float) / (rightEvaluated :?> float) :> obj
+            | And -> (leftEvaluated :?> bool && rightEvaluated :?> bool) :> obj
+            | Or -> (leftEvaluated :?> bool || rightEvaluated :?> bool) :> obj
+            | Equals -> leftEvaluated = rightEvaluated :> obj
+            | NotEquals -> not (leftEvaluated = rightEvaluated) :> obj
+            | GreaterThan -> (leftEvaluated :?> IComparable) > (rightEvaluated :?> IComparable) :> obj
+            | GreaterThanOrEquals -> (leftEvaluated :?> IComparable) >= (rightEvaluated :?> IComparable) :> obj
+            | LesserThan -> (leftEvaluated :?> IComparable) < (rightEvaluated :?> IComparable) :> obj
+            | LesserThanOrEquals -> (leftEvaluated :?> IComparable) <= (rightEvaluated :?> IComparable) :> obj
+
+    let applyFilter expr lst =
+        List.filter (fun i -> evaluate expr i :?> bool) lst
+
+    let applyOrder expr dir lst =
+        match dir with
+        | Ascending -> List.sortBy (fun i -> evaluate expr i :?> IComparable) lst
+        | Descending -> List.sortByDescending (fun i -> evaluate expr i :?> IComparable) lst
+
+    let applySkip count lst =
+        if count < List.length lst then List.skip count lst else lst
+
+    let applyTake count lst =
+        if count < List.length lst then List.take count lst else lst
+
+    List.fold
+        (fun cur stmt ->
+            match stmt with
+            | FilterBy expr -> applyFilter expr cur
+            | OrderBy(expr, dir) -> applyOrder expr dir cur
+            | Skip count -> applySkip count cur
+            | Take count -> applyTake count cur)
+        source
+        query.Statements
