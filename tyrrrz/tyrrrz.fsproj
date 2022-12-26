@@ -3,13 +3,12 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net7.0</TargetFramework>
-    <RootNamespace>try_fparsec</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Include="Query.fs" />
     <Compile Include="Books.fs" />
-    <Compile Include="Program.fs" />
+    <Compile Include="Program.fs" />  
   </ItemGroup>
 
   <ItemGroup>
