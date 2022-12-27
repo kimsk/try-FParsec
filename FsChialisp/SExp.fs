@@ -4,25 +4,24 @@ open FParsec
 
 type SExp =
     | Nil
-    | Cons of (SExp * SExp)
+    | Atom of string
     | Integer of int
     | QuotedString of (char * string)
-    | Atom of string
+    | Cons of (SExp * SExp)
 
 
-let singleQuote: Parser<char, unit> = pchar '''
-let doubleQuote: Parser<char, unit> = pchar '"'
-let openParenthesis: Parser<_, unit> = pchar '(' .>> spaces
-let closeParenthesis: Parser<_, unit> = spaces .>> pchar ')'
-let dot: Parser<_, unit> = pchar '.' .>> spaces
+let singleQuote: Parser<_, unit> = skipChar '''
+let doubleQuote: Parser<_, unit> = skipChar '"'
+let openParenthesis: Parser<_, unit> = skipChar '(' >>. spaces
+let closeParenthesis: Parser<_, unit> = spaces .>> skipChar ')'
+let dot: Parser<_, unit> = skipChar '.' >>. spaces
 
 
-//let nil = openParenthesis >>. spaces >>. closeParenthesis |>> SExp.Nil .>> spaces
-
+let nil = between openParenthesis closeParenthesis spaces >>% SExp.Nil
 
 let atom =
     singleQuote >>. manyCharsTill anyChar singleQuote |>> SExp.Atom .>> spaces
 
 //let opp: Prefix<Expr, unit, unit> = OperatorPrecedenceParser<Expr, _, _>()
 
-let expr = atom
+let expr = choice [ atom; nil ]

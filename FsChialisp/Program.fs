@@ -12,3 +12,5 @@ let test parser input =
     | Failure(e, _, _) -> printfn "%O" e
 
 test expr "'Hello'"
+test nil "()"
+test expr "()"
