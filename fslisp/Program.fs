@@ -26,7 +26,21 @@ test code "abc"
 
 test
     list
-    """( 1)
+    """( 1
+    )
+"""
+
+test
+    code
+    """
+    (
+        (
+
+        )
+        ()
+        1
+    )
+
 """
 
 test

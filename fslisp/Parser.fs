@@ -55,8 +55,15 @@ let stringLiteral: Parser<Expr, unit> =
 
 let expr, exprRef = createParserForwardedToRef<Expr, unit> ()
 
+(* https://stackoverflow.com/questions/52411478/how-to-parse-seq-of-words-separated-by-double-spaces-using-fparsec
 
-let list = (between openParenthesis closeParenthesis (sepBy expr spaces1)) |>> List
+This allows us to not report an error for spaces followed by close parenthesis
+
+*)
+let listSep = attempt (spaces1 .>> notFollowedBy closeParenthesis)
+
+// let list = (between openParenthesis closeParenthesis (sepBy expr spaces1)) |>> List
+let list = (between openParenthesis closeParenthesis (sepBy expr listSep)) |>> List
 
 do exprRef := choice [ list; comment; symbol; number; stringLiteral ]
 
