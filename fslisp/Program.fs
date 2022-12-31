@@ -10,7 +10,8 @@ let test parser input =
     | Success(r, _, _) -> printfn "%s-> %O" padInput r
     | Failure(e, _, _) -> printfn "%O" e
 
-// test nil "()"
+    printfn ""
+
 test symbol "abc"
 test number "123"
 test stringLiteral "\"TEST\""
@@ -18,3 +19,29 @@ test list "(() a b 1 2 \"Hello\")"
 test list "((a b))"
 
 test code "((q 10) (list 1 2 3) a b 1 2 \"Hello\")"
+
+test code "()"
+
+test code "abc"
+
+test
+    list
+    """( 1)
+"""
+
+test
+    list
+    """(
+    (q 10)
+    (list 1 2 3)
+    a b
+    1 2
+    "Hello")"""
+
+test
+    code
+    """
+(
+    ; This is a comment
+    (q 10) (list 1 2 3) a b 1 2 "Hello")
+"""

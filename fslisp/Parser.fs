@@ -3,6 +3,7 @@ module Parser
 open FParsec
 
 type Expr =
+    | Comment of string
     | Symbol of string
     | Number of int
     | String of string
@@ -19,6 +20,9 @@ let closeParenthesis: Parser<_, unit> = spaces .>> skipChar ')'
 
 let symbol: Parser<Expr, unit> = many1Satisfy validChar |>> Symbol
 let number: Parser<Expr, unit> = pint32 |>> Number
+
+let comment: Parser<Expr, unit> =
+    spaces >>. skipMany1 (skipChar ';') >>. spaces >>. restOfLine true |>> Comment
 
 let str (s: string) = pstring s
 
@@ -52,8 +56,8 @@ let stringLiteral: Parser<Expr, unit> =
 let expr, exprRef = createParserForwardedToRef<Expr, unit> ()
 
 
-let list = between openParenthesis closeParenthesis (sepBy expr spaces1 |>> List)
+let list = (between openParenthesis closeParenthesis (sepBy expr spaces1)) |>> List
 
-do exprRef := choice [ symbol; number; stringLiteral; list ]
+do exprRef := choice [ list; comment; symbol; number; stringLiteral ]
 
 let code = spaces >>. expr .>> spaces .>> eof

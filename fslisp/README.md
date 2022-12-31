@@ -1,0 +1,5 @@
+- [LISP Interpreter](https://py.mit.edu/fall22/labs/lisp)
+- [mattherman/fslisp](https://github.com/mattherman/fslisp)
+- [MAKE-A-LISP](http://kanaka.github.io/lambdaconf/#/)
+- [FScheme](https://github.com/AshleyF/FScheme)
+- [(How to Write a (Lisp) Interpreter (in Python))](https://norvig.com/lispy.html)
